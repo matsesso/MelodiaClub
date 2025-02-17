@@ -11,21 +11,11 @@
 <body>
     <div class="container">
         <h1 class="title">Tutorial de Partitura Musical</h1>
-        
-        <!-- Área de seleção de músicas -->
-        <div class="music-selector">
-            <label for="musicSelect">Escolha uma música:</label>
-            <select id="musicSelect">
-                <?php include 'opcoes_musicas.php'; ?>
-            </select>
-        </div>
+    
 
         <!-- Área da partitura -->
         <div id="paper"></div>
         
-        <!-- Controles de áudio -->
-        <div id="audio-controls"></div>
-
         <!-- Input de texto -->
          <form action="" method="post">
             <label for="nota">Coloque uma nota:</label>
@@ -76,6 +66,13 @@
             <button type="submit">Alterar</button>
          </form>
          
+        <!-- Adicionat acorde no compasso -->
+         <form action="" method="post">
+            <label for="acorde">Adicionar acorde ao compasso:</label>
+            <input type="text" name="acorde" id="acorde">
+            <button type="submit">Adicionar</button>
+         </form>
+         
          <!-- Botão para limpar notas -->
          <form action="" method="post">
             <input type="hidden" name="limpar" value="1">
@@ -92,25 +89,47 @@
                 <li>Use os controles de áudio para tocar a música</li>
             </ul>
         </div>
+        <button id="play">▶ Tocar Música</button>
+        <button id="stop">⏹ Parar</button>
+
     </div>
 
     <?php
     // Inicia a sessão
     session_start();
     
+    // Garante que os arquivos existam
+    if (!file_exists("notas.txt") || filesize("notas.txt") == 0) {
+        file_put_contents("notas.txt", "");  // Arquivo vazio, sem estrutura básica
+    }
+    if (!file_exists("tom.txt")) {
+        file_put_contents("tom.txt", "C");
+    }
+    
     // Inicializa o compasso e a quantidade de compassos na linha se não existir
     if (!isset($_SESSION['compasso'])) {
         $_SESSION['compasso'] = 0;
     }
-    if (!isset($_SESSION['linha'])) {
-        $_SESSION['linha'] = 0;
+    if (!isset($_SESSION['quebraDeLinha'])) {
+        $_SESSION['quebraDeLinha'] = 0;
     }
     
     // Limpa o arquivo quando o botão de limpar é pressionado
     if(isset($_POST['limpar'])) {
-        file_put_contents("notas.txt", "");
+        file_put_contents("notas.txt", ""); // Apenas limpa as notas
         file_put_contents("tom.txt", "C"); // Reseta a tonalidade para C
         $_SESSION['compasso'] = 0;
+        $_SESSION['quebraDeLinha'] = 0;
+        header("Location: " . $_SERVER['PHP_SELF']);
+        exit();
+    }
+
+    //Adiciona acorde ao compasso
+    if(isset($_POST['acorde'])){
+        $acorde = $_POST['acorde'];
+        $arquivo = fopen("notas.txt", "a");
+        fwrite($arquivo, '"' . $acorde . '"');
+        fclose($arquivo);
         header("Location: " . $_SERVER['PHP_SELF']);
         exit();
     }
@@ -141,7 +160,7 @@
             
             $_SESSION['compasso'] += $valor_tempo;
             $nota = $nota . "" . $tempo;
-            $_SESSION['linha']++;
+            $_SESSION['quebraDeLinha']++;
             
             // Abre o arquivo para adicionar a nota
             $arquivo = fopen("notas.txt", "a");
@@ -155,30 +174,11 @@
                 }
 
                 //Adiciona quebra de linha quando completar 5 tempos
-                if($_SESSION['linha'] == 5){
+                if($_SESSION['quebraDeLinha'] == 5){
                     fwrite($arquivo, "|" . "\\n" . "|");
-                    $_SESSION['linha'] = 0;
+                    $_SESSION['quebraDeLinha'] = 0;
                 }
                 
-                fclose($arquivo);
-                
-                // Redireciona para evitar reenvio do formulário
-                header("Location: " . $_SERVER['PHP_SELF']);
-                exit();
-            }
-        }
-    }
-    
-    // Processa o novo formulário de select
-    if(isset($_POST['nota_select'])){
-        $nota = $_POST['nota_select'];
-        
-        // Verifica se a nota não está vazia
-        if (!empty($nota)) {
-            // Abre o arquivo para adicionar a nota
-            $arquivo = fopen("notas.txt", "a");
-            if ($arquivo) {
-                fwrite($arquivo, $nota);
                 fclose($arquivo);
                 
                 // Redireciona para evitar reenvio do formulário
@@ -193,5 +193,46 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/abcjs/6.2.2/abcjs-basic.min.js"></script>
     <script src="musicas.php"></script>
     <script src="main.php"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", async function () {
+            // Renderiza a partitura na tela
+            let visualObj = ABCJS.renderAbc("paper", musicaABC, { responsive: "resize" })[0];
+
+            // Verifica se o navegador suporta áudio
+            if (!ABCJS.synth.supportsAudio()) {
+                alert("Seu navegador não suporta áudio no ABCJS!");
+                return;
+            }
+
+            let audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            let synthControl = new ABCJS.synth.CreateSynth();
+
+            async function playMusic() {
+                if (synthControl) synthControl.stop();
+
+                try {
+                    await synthControl.init({
+                        visualObj: visualObj,
+                        audioContext: audioContext,
+                        millisecondsPerMeasure: 2000
+                    });
+
+                    await synthControl.prime(); // Prepara o áudio para evitar atrasos
+                    synthControl.start(); // Toca a música
+                } catch (error) {
+                    console.error("Erro ao tocar a música:", error);
+                }
+            }
+
+            function stopMusic() {
+                if (synthControl) {
+                    synthControl.stop();
+                }
+            }
+
+            document.getElementById("play").addEventListener("click", playMusic);
+            document.getElementById("stop").addEventListener("click", stopMusic);
+        });
+    </script>
 </body>
 </html>

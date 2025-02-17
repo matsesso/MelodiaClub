@@ -55,3 +55,17 @@
 .explanation ul {
     line-height: 1.6;
 } 
+
+.limpar-notas {
+    background-color: #f44336;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+}
+
+.limpar-notas:hover {
+    background-color: #d32f2f;
+}

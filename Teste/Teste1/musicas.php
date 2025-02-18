@@ -18,6 +18,13 @@ if (file_exists("tom.txt") && filesize("tom.txt") > 0) {
     file_put_contents("tom.txt", "C"); // Cria o arquivo com tom C se não existir
 }
 
+// Lê o compasso da partitura
+if (file_exists("compasso.txt") && filesize("compasso.txt") > 0) {
+    $compasso = file_get_contents("compasso.txt");
+} else {
+    $compasso = "4/4";
+}
+
 // Converte as notas em uma string ABC
 $abc_notas = implode(" ", $notas);
 
@@ -25,7 +32,7 @@ $abc_notas = implode(" ", $notas);
 echo "const musicaABC = `
 X:1
 T:Suas Notas
-M:4/4
+M:$compasso
 L:1/4
 K:$tom
 |${abc_notas}|

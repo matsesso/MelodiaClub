@@ -166,9 +166,9 @@ if(isset($_POST['nota'])){
                 <option value="z">Pausa</option>
             </select>
             <select name="nota_select" id="nota_select">
+                <option value="1">1</option>
                 <option value="4">4</option>
                 <option value="2">2</option>
-                <option value="1">1</option>
                 <option value="1/2">1/2</option>
                 <option value="1/4">1/4</option>
                 <option value="1/8">1/8</option>
@@ -266,7 +266,7 @@ if(isset($_POST['nota'])){
 
                 // Pega a velocidade selecionada
                 let bpm = parseInt(document.getElementById('bpm').value);
-                bpm = (60 / bpm) * 4000;
+                bpm = (60 / bpm) * 1000;
 
                 try {
                     await synthControl.init({

@@ -6,21 +6,21 @@ $notas = [];
 $tom = "";
 
 // Lê as notas do arquivo se ele existir
-if (file_exists("notas.txt")) {
-    $notas = file("notas.txt", FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+if (file_exists("Txts/notas.txt")) {
+    $notas = file("Txts/notas.txt", FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
 }
 
 //Lê a tonalidade da partitura
-if (file_exists("tom.txt") && filesize("tom.txt") > 0) {
-    $tom = file_get_contents("tom.txt");
+if (file_exists("Txts/tom.txt") && filesize("Txts/tom.txt") > 0) {
+    $tom = file_get_contents("Txts/tom.txt");
 } else {
     $tom = "C";
-    file_put_contents("tom.txt", "C"); // Cria o arquivo com tom C se não existir
+    file_put_contents("Txts/tom.txt", "C"); // Cria o arquivo com tom C se não existir
 }
 
 // Lê o compasso da partitura
-if (file_exists("compasso.txt") && filesize("compasso.txt") > 0) {
-    $compasso = file_get_contents("compasso.txt");
+if (file_exists("Txts/compasso.txt") && filesize("Txts/compasso.txt") > 0) {
+    $compasso = file_get_contents("Txts/compasso.txt");
 } else {
     $compasso = "4/4";
 }

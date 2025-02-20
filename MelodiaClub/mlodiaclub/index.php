@@ -3,11 +3,11 @@
 session_start();
 
 // Garante que os arquivos existam
-if (!file_exists("notas.txt") || filesize("notas.txt") == 0) {
-    file_put_contents("notas.txt", "");  // Arquivo vazio, sem estrutura básica
+if (!file_exists("Txts/notas.txt") || filesize("Txts/notas.txt") == 0) {
+    file_put_contents("Txts/notas.txt", "");  // Arquivo vazio, sem estrutura básica
 }
-if (!file_exists("tom.txt")) {
-    file_put_contents("tom.txt", "C");
+if (!file_exists("Txts/tom.txt")) {
+    file_put_contents("Txts/tom.txt", "C");
 }
 
 // Inicializa o compasso e a quantidade de compassos na linha se não existir
@@ -20,8 +20,8 @@ if (!isset($_SESSION['quebraDeLinha'])) {
 
 // Limpa o arquivo quando o botão de limpar é pressionado
 if(isset($_POST['limpar'])) {
-    file_put_contents("notas.txt", ""); // Apenas limpa as notas
-    file_put_contents("tom.txt", "C"); // Reseta a tonalidade para C
+    file_put_contents("Txts/notas.txt", ""); // Apenas limpa as notas
+    file_put_contents("Txts/tom.txt", "C"); // Reseta a tonalidade para C
     $_SESSION['quantidadeDeCompassos'] = 0;
     $_SESSION['quebraDeLinha'] = 0;
     header("Location: " . $_SERVER['PHP_SELF']);
@@ -31,10 +31,16 @@ if(isset($_POST['limpar'])) {
 // Processa o novo formulário de compasso
 if(isset($_POST['compasso'])){
     $compasso = $_POST['compasso'];
-    if(filesize("compasso.txt") > 0){
-        file_put_contents("compasso.txt", "");
+    if(filesize("Txts/compasso.txt") > 0){
+        file_put_contents("Txts/compasso.txt", "");
     }
-    file_put_contents("compasso.txt", $compasso);
+    file_put_contents("Txts/compasso.txt", $compasso);
+    
+    // Extrai o numerador do compasso para definir o total de tempos
+    list($numerador, $denominador) = explode('/', $compasso);
+    $_SESSION['totalTemposCompasso'] = (float)$numerador;
+    $_SESSION['quantidadeDeCompassos'] = 0; // Reseta o contador
+    
     header("Location: " . $_SERVER['PHP_SELF']);
     exit();
 }
@@ -42,7 +48,7 @@ if(isset($_POST['compasso'])){
 //Adiciona acorde ao compasso
 if(isset($_POST['acorde'])){
     $acorde = $_POST['acorde'];
-    $arquivo = fopen("notas.txt", "a");
+    $arquivo = fopen("Txts/notas.txt", "a");
     fwrite($arquivo, '"' . $acorde . '"');
     fclose($arquivo);
     header("Location: " . $_SERVER['PHP_SELF']);
@@ -52,10 +58,10 @@ if(isset($_POST['acorde'])){
 // Processa o novo formulário de tonalidade
 if(isset($_POST['tom'])){
     $tom = $_POST['tom'];
-    if(filesize("tom.txt") > 0){
-        file_put_contents("tom.txt", "");
+    if(filesize("Txts/tom.txt") > 0){
+        file_put_contents("Txts/tom.txt", "");
     }
-    file_put_contents("tom.txt", $tom);
+    file_put_contents("Txts/tom.txt", $tom);
     header("Location: " . $_SERVER['PHP_SELF']);
     exit();
 }
@@ -75,33 +81,47 @@ if(isset($_POST['nota'])){
             $valor_tempo = (float)$tempo;
         }
         
-        $_SESSION['quantidadeDeCompassos'] += $valor_tempo;
-        $nota = $nota . "" . $tempo;
+        // Lê o compasso atual
+        $compasso = file_get_contents("Txts/compasso.txt");
+        list($numerador, $denominador) = explode('/', $compasso);
+        $totalTemposCompasso = (float)$numerador;
         
-        // Abre o arquivo para adicionar a nota
-        $arquivo = fopen("notas.txt", "a");
-        if ($arquivo) {
-            fwrite($arquivo, $nota);
+        // Calcula o espaço disponível no compasso atual
+        $espacoDisponivel = $totalTemposCompasso - $_SESSION['quantidadeDeCompassos'];
+        
+        // Verifica se a nota cabe no espaço disponível
+        if ($valor_tempo <= $espacoDisponivel) {
+            $_SESSION['quantidadeDeCompassos'] += $valor_tempo;
+            $nota = $nota . "" . $tempo;
             
-            // Adiciona barra de compasso quando completar exatamente 4 tempos
-            if(abs($_SESSION['quantidadeDeCompassos'] - 4) < 0.0001){
-                fwrite($arquivo, " | ");
-                $_SESSION['quantidadeDeCompassos'] = 0;
-                $_SESSION['quebraDeLinha']++; // Incrementa o contador de compassos
+            // Abre o arquivo para adicionar a nota
+            $arquivo = fopen("Txts/notas.txt", "a");
+            if ($arquivo) {
+                fwrite($arquivo, $nota);
                 
-                // Quebra a linha após 5 compassos
-                if($_SESSION['quebraDeLinha'] >= 5){
-                    fwrite($arquivo, "\\n");
-                    $_SESSION['quebraDeLinha'] = 0;
+                // Adiciona barra de compasso quando completar exatamente o número de tempos do compasso
+                if(abs($_SESSION['quantidadeDeCompassos'] - $totalTemposCompasso) < 0.0001){
+                    fwrite($arquivo, " | ");
+                    $_SESSION['quantidadeDeCompassos'] = 0;
+                    $_SESSION['quebraDeLinha']++; // Incrementa o contador de compassos
+                    
+                    // Quebra a linha após 5 compassos
+                    if($_SESSION['quebraDeLinha'] >= 5){
+                        fwrite($arquivo, "\\n");
+                        $_SESSION['quebraDeLinha'] = 0;
+                    }
                 }
+                
+                fclose($arquivo);
             }
-            
-            fclose($arquivo);
-            
-            // Redireciona para evitar reenvio do formulário
-            header("Location: " . $_SERVER['PHP_SELF']);
-            exit();
+        } else {
+            // Opcional: Adicionar mensagem de erro na sessão
+            $_SESSION['erro'] = "Nota muito longa para o espaço disponível no compasso!";
         }
+        
+        // Redireciona para evitar reenvio do formulário
+        header("Location: " . $_SERVER['PHP_SELF']);
+        exit();
     }
 }
 ?>
@@ -272,5 +292,11 @@ if(isset($_POST['nota'])){
             document.getElementById("stop").addEventListener("click", stopMusic);
         });
     </script>
+
+    <!-- Adicione isso logo após a abertura da tag body ou onde desejar mostrar a mensagem de erro -->
+    <?php if (isset($_SESSION['erro'])) {
+        echo '<div class="erro">' . $_SESSION['erro'] . '</div>';
+        unset($_SESSION['erro']);
+    } ?>
 </body>
 </html>

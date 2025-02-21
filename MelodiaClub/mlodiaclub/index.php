@@ -2,7 +2,10 @@
 // Inicia a sessão
 session_start();
 
-// Garante que os arquivos existam
+// Garante que os arquivos e diretórios existam
+if (!file_exists("Musicas")) {
+    mkdir("Musicas", 0777, true);
+}
 if (!file_exists("Txts/notas.txt") || filesize("Txts/notas.txt") == 0) {
     file_put_contents("Txts/notas.txt", "");  // Arquivo vazio, sem estrutura básica
 }
@@ -46,11 +49,37 @@ if(isset($_POST['compasso'])){
 }
 
 //Adiciona acorde ao compasso
-if(isset($_POST['acorde'])){
+if(isset($_POST['acorde']) && isset($_POST['numero_compasso'])) {
     $acorde = $_POST['acorde'];
-    $arquivo = fopen("Txts/notas.txt", "a");
-    fwrite($arquivo, '"' . $acorde . '"');
-    fclose($arquivo);
+    $numero_compasso = (int)$_POST['numero_compasso'];
+    
+    // Lê o conteúdo atual do arquivo
+    $conteudo = file_get_contents("Txts/notas.txt");
+    
+    // Divide o conteúdo em compassos usando o delimitador |
+    $compassos = explode("|", $conteudo);
+    
+    // Verifica se o número do compasso é válido
+    if($numero_compasso > 0 && $numero_compasso <= count($compassos)) {
+        // Índice do array é número do compasso - 1
+        $indice = $numero_compasso - 1;
+        
+        // Remove qualquer acorde existente (texto entre aspas duplas)
+        $compassos[$indice] = preg_replace('/"[^"]*"/', '', $compassos[$indice]);
+        
+        // Adiciona o novo acorde no início do compasso
+        $compassos[$indice] = ' "' . $acorde . '" ' . trim($compassos[$indice]);
+        
+        // Junta os compassos novamente
+        $novo_conteudo = implode("|", $compassos);
+        
+        // Salva o conteúdo atualizado
+        file_put_contents("Txts/notas.txt", $novo_conteudo);
+        $_SESSION['sucesso'] = "Acorde adicionado ao compasso $numero_compasso!";
+    } else {
+        $_SESSION['erro'] = "Número de compasso inválido!";
+    }
+    
     header("Location: " . $_SERVER['PHP_SELF']);
     exit();
 }
@@ -89,40 +118,122 @@ if(isset($_POST['nota'])){
         // Calcula o espaço disponível no compasso atual
         $espacoDisponivel = $totalTemposCompasso - $_SESSION['quantidadeDeCompassos'];
         
-        // Verifica se a nota cabe no espaço disponível
-        if ($valor_tempo <= $espacoDisponivel) {
-            $_SESSION['quantidadeDeCompassos'] += $valor_tempo;
-            $nota = $nota . "" . $tempo;
-            
-            // Abre o arquivo para adicionar a nota
-            $arquivo = fopen("Txts/notas.txt", "a");
-            if ($arquivo) {
-                fwrite($arquivo, $nota);
+        // Abre o arquivo para adicionar a nota
+        $arquivo = fopen("Txts/notas.txt", "a");
+        if ($arquivo) {
+            // Se a nota é maior que o espaço disponível
+            if ($valor_tempo > $espacoDisponivel) {
+                $tempo_restante = $valor_tempo;
+                $precisa_ligar = true; // Flag para indicar que precisamos de ligaduras
                 
-                // Adiciona barra de compasso quando completar exatamente o número de tempos do compasso
-                if(abs($_SESSION['quantidadeDeCompassos'] - $totalTemposCompasso) < 0.0001){
+                // Primeira parte - completa o compasso atual
+                if ($espacoDisponivel > 0) {
+                    fwrite($arquivo, $nota . $espacoDisponivel . "-");
+                    $tempo_restante -= $espacoDisponivel;
                     fwrite($arquivo, " | ");
-                    $_SESSION['quantidadeDeCompassos'] = 0;
-                    $_SESSION['quebraDeLinha']++; // Incrementa o contador de compassos
-                    
-                    // Quebra a linha após 5 compassos
+                    $_SESSION['quebraDeLinha']++;
                     if($_SESSION['quebraDeLinha'] >= 5){
                         fwrite($arquivo, "\\n");
                         $_SESSION['quebraDeLinha'] = 0;
                     }
                 }
                 
-                fclose($arquivo);
+                // Compassos completos intermediários
+                while ($tempo_restante > $totalTemposCompasso) {
+                    fwrite($arquivo, "-" . $nota . $totalTemposCompasso . "-");
+                    $tempo_restante -= $totalTemposCompasso;
+                    fwrite($arquivo, " | ");
+                    $_SESSION['quebraDeLinha']++;
+                    if($_SESSION['quebraDeLinha'] >= 5){
+                        fwrite($arquivo, "\\n");
+                        $_SESSION['quebraDeLinha'] = 0;
+                    }
+                }
+                
+                // Última parte - resto que sobrou
+                if ($tempo_restante > 0) {
+                    fwrite($arquivo, "-" . $nota . $tempo_restante);
+                    $_SESSION['quantidadeDeCompassos'] = $tempo_restante;
+                } else {
+                    $_SESSION['quantidadeDeCompassos'] = 0;
+                }
+                
+            } else {
+                // Nota cabe no compasso atual
+                fwrite($arquivo, $nota . $tempo);
+                $_SESSION['quantidadeDeCompassos'] += $valor_tempo;
+                
+                // Se completou exatamente o compasso
+                if(abs($_SESSION['quantidadeDeCompassos'] - $totalTemposCompasso) < 0.0001){
+                    fwrite($arquivo, " | ");
+                    $_SESSION['quantidadeDeCompassos'] = 0;
+                    $_SESSION['quebraDeLinha']++;
+                    if($_SESSION['quebraDeLinha'] >= 5){
+                        fwrite($arquivo, "\\n");
+                        $_SESSION['quebraDeLinha'] = 0;
+                    }
+                }
             }
-        } else {
-            // Opcional: Adicionar mensagem de erro na sessão
-            $_SESSION['erro'] = "Nota muito longa para o espaço disponível no compasso!";
+            
+            fclose($arquivo);
+            $_SESSION['sucesso'] = "Nota adicionada com sucesso!";
         }
         
-        // Redireciona para evitar reenvio do formulário
         header("Location: " . $_SERVER['PHP_SELF']);
         exit();
     }
+}
+
+// Salva a música com um nome
+if(isset($_POST['salvar_musica']) && isset($_POST['nome_musica'])) {
+    $nome_musica = preg_replace("/[^a-zA-Z0-9]/", "_", $_POST['nome_musica']); // Remove caracteres especiais
+    
+    $dados_musica = [
+        'notas' => file_get_contents("Txts/notas.txt"),
+        'tom' => file_get_contents("Txts/tom.txt"),
+        'compasso' => file_get_contents("Txts/compasso.txt")
+    ];
+    
+    $arquivo_musica = "Musicas/" . $nome_musica . ".txt";
+    
+    if(file_put_contents($arquivo_musica, json_encode($dados_musica))) {
+        $_SESSION['sucesso'] = "Música '$nome_musica' salva com sucesso!";
+    } else {
+        $_SESSION['erro'] = "Erro ao salvar a música!";
+    }
+    
+    header("Location: " . $_SERVER['PHP_SELF']);
+    exit();
+}
+
+// Carrega uma música salva
+if(isset($_POST['carregar_musica'])) {
+    $nome_musica = $_POST['carregar_musica'];
+    $arquivo_musica = "Musicas/" . $nome_musica . ".txt";
+    
+    if(file_exists($arquivo_musica)) {
+        $dados_musica = json_decode(file_get_contents($arquivo_musica), true);
+        
+        if($dados_musica) {
+            // Restaura os dados da música
+            file_put_contents("Txts/notas.txt", $dados_musica['notas']);
+            file_put_contents("Txts/tom.txt", $dados_musica['tom']);
+            file_put_contents("Txts/compasso.txt", $dados_musica['compasso']);
+            
+            // Reseta os contadores
+            $_SESSION['quantidadeDeCompassos'] = 0;
+            $_SESSION['quebraDeLinha'] = 0;
+            
+            $_SESSION['sucesso'] = "Música '$nome_musica' carregada com sucesso!";
+        } else {
+            $_SESSION['erro'] = "Erro ao carregar a música!";
+        }
+    } else {
+        $_SESSION['erro'] = "Arquivo da música não encontrado!";
+    }
+    
+    header("Location: " . $_SERVER['PHP_SELF']);
+    exit();
 }
 ?>
 <!DOCTYPE html>
@@ -193,10 +304,12 @@ if(isset($_POST['nota'])){
             <button type="submit">Alterar</button>
          </form>
          
-        <!-- Adicionat acorde no compasso -->
+        <!-- Adicionar acorde no compasso -->
          <form action="" method="post">
             <label for="acorde">Adicionar acorde ao compasso:</label>
             <input type="text" name="acorde" id="acorde">
+            <label for="numero_compasso">Número do compasso:</label>
+            <input type="number" name="numero_compasso" id="numero_compasso" min="1" required>
             <button type="submit">Adicionar</button>
          </form>
 
@@ -221,16 +334,27 @@ if(isset($_POST['nota'])){
             <button type="submit" class="limpar-notas">Limpar Notas</button>
          </form>
 
-        <!-- Explicações -->
-        <div class="explanation">
-            <h2>Como funciona:</h2>
-            <ul>
-                <li>A partitura acima usa a notação ABC</li>
-                <li>Os acordes são mostrados acima das notas</li>
-                <li>A letra da música está sincronizada com as notas</li>
-                <li>Use os controles de áudio para tocar a música</li>
-            </ul>
-        </div>
+         <!-- Salvar Música -->
+         <form action="" method="post">
+            <label for="nome_musica">Nome da música:</label>
+            <input type="text" name="nome_musica" id="nome_musica" required>
+            <button type="submit" name="salvar_musica">Salvar Música</button>
+         </form>
+
+         <!-- Carregar Música -->
+         <form action="" method="post">
+            <label for="carregar_musica">Carregar música:</label>
+            <select name="carregar_musica" id="carregar_musica">
+                <?php
+                $musicas = glob("Musicas/*.txt");
+                foreach($musicas as $musica) {
+                    $nome = basename($musica, '.txt');
+                    echo "<option value='$nome'>$nome</option>";
+                }
+                ?>
+            </select>
+            <button type="submit">Carregar</button>
+         </form>
 
         <!-- Adicione este controle de velocidade antes dos botões de play/stop -->
         <div class="controls">
@@ -297,6 +421,10 @@ if(isset($_POST['nota'])){
     <?php if (isset($_SESSION['erro'])) {
         echo '<div class="erro">' . $_SESSION['erro'] . '</div>';
         unset($_SESSION['erro']);
+    }
+    if (isset($_SESSION['sucesso'])) {
+        echo '<div class="sucesso">' . $_SESSION['sucesso'] . '</div>';
+        unset($_SESSION['sucesso']);
     } ?>
 </body>
 </html>

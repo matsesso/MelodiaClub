@@ -141,14 +141,21 @@ if(isset($_POST['nota'])){
         if(!empty($oitava)) {
             $nota = $nota . $oitava;
         }
-        
-        // Converte a fração em número decimal
-        if (strpos($tempo, '/') !== false) {
-            list($numerador, $denominador) = explode('/', $tempo);
-            $valor_tempo = $numerador / $denominador;
+
+        //Verifica se é stacato
+        if($tempo == ".") {
+            $nota = $tempo . $nota;
+            $valor_tempo = 1;
         } else {
-            $valor_tempo = (float)$tempo;
+            // Converte a fração em número decimal
+            if (strpos($tempo, '/') !== false) {
+                list($numerador, $denominador) = explode('/', $tempo);
+                $valor_tempo = $numerador / $denominador;
+            } else {
+                $valor_tempo = (float)$tempo;
+            }
         }
+        
         
         // Lê o compasso atual
         $compasso = file_get_contents("Txts/compasso.txt");
@@ -200,19 +207,34 @@ if(isset($_POST['nota'])){
                 
             } else {
                 // Nota cabe no compasso atual
-                fwrite($arquivo, $nota . $tempo);
-                $_SESSION['quantidadeDeCompassos'] += $valor_tempo;
-                
-                // Se completou exatamente o compasso
-                if(abs($_SESSION['quantidadeDeCompassos'] - $totalTemposCompasso) < 0.0001){
-                    fwrite($arquivo, " | ");
-                    $_SESSION['quantidadeDeCompassos'] = 0;
-                    $_SESSION['quebraDeLinha']++;
-                    if($_SESSION['quebraDeLinha'] >= 5){
-                        fwrite($arquivo, "\\n");
-                        $_SESSION['quebraDeLinha'] = 0;
+                if($tempo != ".") {
+                    fwrite($arquivo, $nota . $tempo);
+                    $_SESSION['quantidadeDeCompassos'] += $valor_tempo;
+                    
+                    // Se completou exatamente o compasso
+                    if(abs($_SESSION['quantidadeDeCompassos'] - $totalTemposCompasso) < 0.0001){
+                        fwrite($arquivo, " | ");
+                        $_SESSION['quantidadeDeCompassos'] = 0;
+                        $_SESSION['quebraDeLinha']++;
+                        if($_SESSION['quebraDeLinha'] >= 5){
+                            fwrite($arquivo, "\\n");
+                            $_SESSION['quebraDeLinha'] = 0;
+                        }
+                    }
+                } else {
+                    fwrite($arquivo, $nota);
+                    $_SESSION['quantidadeDeCompassos'] += $valor_tempo;
+                    if(abs($_SESSION['quantidadeDeCompassos'] - $totalTemposCompasso) < 0.0001){
+                        fwrite($arquivo, " | ");
+                        $_SESSION['quantidadeDeCompassos'] = 0;
+                        $_SESSION['quebraDeLinha']++;
+                        if($_SESSION['quebraDeLinha'] >= 5){
+                            fwrite($arquivo, "\\n");
+                            $_SESSION['quebraDeLinha'] = 0;
+                        }
                     }
                 }
+                
             }
             
             fclose($arquivo);
@@ -231,7 +253,8 @@ if(isset($_POST['salvar_musica']) && isset($_POST['nome_musica'])) {
     $dados_musica = [
         'notas' => file_get_contents("Txts/notas.txt"),
         'tom' => file_get_contents("Txts/tom.txt"),
-        'compasso' => file_get_contents("Txts/compasso.txt")
+        'compasso' => file_get_contents("Txts/compasso.txt"),
+        'bpm' => file_get_contents("Txts/tempo.txt")
     ];
 
     //Crie um arquivo txt com o nome da música
@@ -325,6 +348,7 @@ if(isset($_POST['carregar_musica'])) {
                 <option value="1/8">1/8</option>
                 <option value="1/16">1/16</option>
                 <option value="1/32">1/32</option>
+                <option value=".">stacato</option>
             </select>
             <select name="oitava" id="oitava">
                 <option value="" select>oitava padrão</option>

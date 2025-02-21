@@ -113,16 +113,22 @@ if(isset($_POST['tom'])){
     exit();
 }
 
+//Adicionar Ritornelo
+if(isset($_POST['ritornelo'])) {
+    $ritornelo = $_POST['ritornelo'];
+    file_put_contents("Txts/notas.txt", $ritornelo, FILE_APPEND);
+}
 
 if(isset($_POST['nota'])){
     $nota = $_POST['nota'];
+    $oitava = $_POST['oitava'];
     
     // Verifica se a nota não está vazia
     if (!empty($nota)) {
         $tempo = $_POST['nota_select'];
 
-        if(!empty($nota)) {
-            $oitava = $_POST['oitava'];
+        //Mudar a oitava da nota
+        if(!empty($oitava)) {
             $nota = $nota . $oitava;
         }
         
@@ -321,6 +327,12 @@ if(isset($_POST['carregar_musica'])) {
             </select>
             <button type="submit">Adicionar</button>
          </form>
+
+         <!-- Adicinar ritornelo -->
+          <form action="" method="post">
+            <input type="hidden" name="ritornelo" value=":">
+            <button type="submit">Adicionar Ritornelo</button>
+          </form>
 
          <!-- Botão para alterar a tonalidade -->
          <form action="" method="post">

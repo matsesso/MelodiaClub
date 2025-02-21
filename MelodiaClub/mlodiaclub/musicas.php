@@ -25,6 +25,12 @@ if (file_exists("Txts/compasso.txt") && filesize("Txts/compasso.txt") > 0) {
     $compasso = "4/4";
 }
 
+if (file_exists("Txts/tempo.txt") && filesize("Txts/tempo.txt") > 0) {
+    $tempoBpm = file_get_contents("Txts/tempo.txt");
+} else {
+    $tempoBpm = "60";
+}
+
 // Converte as notas em uma string ABC
 $abc_notas = implode(" ", $notas);
 
@@ -34,6 +40,7 @@ X:1
 T:Suas Notas
 M:$compasso
 L:1/4
+Q:$tempoBpm
 K:$tom
 |${abc_notas}|
 `;";

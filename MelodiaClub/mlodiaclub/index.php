@@ -102,6 +102,16 @@ if(isset($_POST['acorde']) && isset($_POST['numero_compasso'])) {
     exit();
 }
 
+if(isset($_POST['bpm'])) {
+    $tempoBpm = $_POST['bpm'];
+    if(filesize("Txts/tempo.txt") > 0){
+        file_put_contents("Txts/tempo.txt", "");
+    }
+    file_put_contents("Txts/tempo.txt", $tempoBpm);
+    header("Location: " . $_SERVER['PHP_SELF']);
+    exit();
+}
+
 // Processa o novo formulário de tonalidade
 if(isset($_POST['tom'])){
     $tom = $_POST['tom'];
@@ -408,12 +418,14 @@ if(isset($_POST['carregar_musica'])) {
          </form>
 
         <!-- Adicione este controle de velocidade antes dos botões de play/stop -->
-        <div class="controls">
-            <label for="tempo">Bpm:</label>
-            <input type="text" id="bpm" name="bpm">
-            <button id="play">▶ Tocar Música</button>
-            <button id="stop">⏹ Parar</button>
-        </div>
+         <form action="" method="post">
+            <div class="controls">
+                <label for="tempo">Bpm:</label>
+                <input type="text" id="bpm" name="bpm">
+                <button id="play" type="submit">▶ Tocar Música</button>
+                <button id="stop">⏹ Parar</button>
+            </div>
+         </form>
 
     </div>
 

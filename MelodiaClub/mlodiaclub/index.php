@@ -31,6 +31,24 @@ if(isset($_POST['limpar'])) {
     exit();
 }
 
+//Retira a última nota da partitura
+if(isset($_POST['retirar'])) {
+    $conteudo = file_get_contents("Txts/notas.txt");
+    
+    $contador = 0;
+    $novo_conteudo = preg_replace_callback('/[^ |\n]|\|/', function ($match) use (&$contador) {
+        return (++$contador > 2) ? $match[0] : ''; // Mantém apenas os caracteres após remover 2 reais
+    }, strrev($conteudo));
+
+    // Reverte de volta à ordem original
+    $novo_conteudo = strrev($novo_conteudo);
+
+    // Sobrescreve o arquivo com o novo conteúdo
+    file_put_contents("Txts/notas.txt", $novo_conteudo);
+    header("Location: " . $_SERVER['PHP_SELF']);
+    exit();
+}
+
 // Processa o novo formulário de compasso
 if(isset($_POST['compasso'])){
     $compasso = $_POST['compasso'];
@@ -95,12 +113,18 @@ if(isset($_POST['tom'])){
     exit();
 }
 
+
 if(isset($_POST['nota'])){
     $nota = $_POST['nota'];
     
     // Verifica se a nota não está vazia
     if (!empty($nota)) {
         $tempo = $_POST['nota_select'];
+
+        if(!empty($nota)) {
+            $oitava = $_POST['oitava'];
+            $nota = $nota . $oitava;
+        }
         
         // Converte a fração em número decimal
         if (strpos($tempo, '/') !== false) {
@@ -193,7 +217,8 @@ if(isset($_POST['salvar_musica']) && isset($_POST['nome_musica'])) {
         'tom' => file_get_contents("Txts/tom.txt"),
         'compasso' => file_get_contents("Txts/compasso.txt")
     ];
-    
+
+    //Crie um arquivo txt com o nome da música
     $arquivo_musica = "Musicas/" . $nome_musica . ".txt";
     
     if(file_put_contents($arquivo_musica, json_encode($dados_musica))) {
@@ -273,18 +298,26 @@ if(isset($_POST['carregar_musica'])) {
                 <option value="A">A</option>
                 <option value="^A">A#</option>
                 <option value="B">B</option>
-                <option value="^B">B#</option>
                 <option value="z">Pausa</option>
             </select>
             <select name="nota_select" id="nota_select">
-                <option value="1">1</option>
                 <option value="4">4</option>
                 <option value="2">2</option>
+                <option value="1" selected>1</option>
                 <option value="1/2">1/2</option>
                 <option value="1/4">1/4</option>
                 <option value="1/8">1/8</option>
                 <option value="1/16">1/16</option>
                 <option value="1/32">1/32</option>
+            </select>
+            <select name="oitava" id="oitava">
+                <option value="" select>oitava padrão</option>
+                <option value="'">1 oitava acima</option>
+                <option value="''">2 oitava acimas</option>
+                <option value="'''">3 oitava acimas</option>
+                <option value=",">1 oitava abaixo</option>
+                <option value=",,">2 oitava abaixos</option>
+                <option value=",,,">3 oitava abaixos</option>
             </select>
             <button type="submit">Adicionar</button>
          </form>
@@ -333,6 +366,12 @@ if(isset($_POST['carregar_musica'])) {
             <input type="hidden" name="limpar" value="1">
             <button type="submit" class="limpar-notas">Limpar Notas</button>
          </form>
+
+         <!-- Botão retirar última nota -->
+          <form action="" method="post">
+            <input type="hidden" name="retirar" value="1">
+            <button type="submit" class="limpar-notas">Retirar nota</button>
+          </form>
 
          <!-- Salvar Música -->
          <form action="" method="post">

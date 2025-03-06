@@ -7,7 +7,7 @@
     <!-- Estilos -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/abcjs/6.2.2/abcjs-audio.min.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap">
-    <link rel="stylesheet" href="../assets/styles.css">
+    <link rel="stylesheet" href="/assets/styles.css">
 </head>
 <body>
     <!-- Mensagens de erro/sucesso -->
@@ -55,7 +55,7 @@
                 <div id="notas" class="tab-pane active">
                     <div class="card">
                         <h3>Adicionar Notas</h3>
-                        <form action="index.php" method="post" class="form-grid">
+                        <form action="" method="post" class="form-grid">
                             <div class="form-group">
                                 <label for="nota">Nota:</label>
                                 <select name="nota" id="nota" class="select-estilizado">
@@ -110,17 +110,17 @@
                     </div>
 
                     <div class="acoes-rapidas">
-                        <form action="index.php" method="post" class="inline-form">
+                        <form action="" method="post" class="inline-form">
                             <input type="hidden" name="ritornelo" value=":">
                             <button type="submit" class="btn-secundario">Adicionar Ritornelo</button>
                         </form>
                         
-                        <form action="index.php" method="post" class="inline-form">
+                        <form action="" method="post" class="inline-form">
                             <input type="hidden" name="retirar" value="1">
                             <button type="submit" class="btn-secundario">Retirar Última Nota</button>
                         </form>
                         
-                        <form action="index.php" method="post" class="inline-form">
+                        <form action="" method="post" class="inline-form">
                             <input type="hidden" name="limpar" value="1">
                             <button type="submit" class="btn-perigo">Limpar Todas as Notas</button>
                         </form>
@@ -128,7 +128,7 @@
                     
                     <div class="card">
                         <h3>Adicionar Acorde</h3>
-                        <form action="index.php" method="post" class="form-grid">
+                        <form action="" method="post" class="form-grid">
                             <div class="form-group">
                                 <label for="acorde">Acorde:</label>
                                 <input type="text" name="acorde" id="acorde" placeholder="Ex: C, Am, G7">
@@ -148,7 +148,7 @@
                 <div id="configuracoes" class="tab-pane">
                     <div class="card">
                         <h3>Tonalidade</h3>
-                        <form action="index.php" method="post">
+                        <form action="" method="post">
                             <div class="form-group">
                                 <label for="tom">Selecione a tonalidade:</label>
                                 <select name="tom" id="tom" class="select-estilizado">
@@ -167,7 +167,7 @@
 
                     <div class="card">
                         <h3>Fórmula de Compasso</h3>
-                        <form action="index.php" method="post">
+                        <form action="" method="post">
                             <div class="form-group">
                                 <label for="compasso">Selecione o compasso:</label>
                                 <select name="compasso" id="compasso" class="select-estilizado">
@@ -189,7 +189,7 @@
                 <div id="salvar" class="tab-pane">
                     <div class="card">
                         <h3>Salvar Música</h3>
-                        <form action="index.php" method="post">
+                        <form action="" method="post">
                             <div class="form-group">
                                 <label for="nome_musica">Nome da música:</label>
                                 <input type="text" name="nome_musica" id="nome_musica" required placeholder="Digite o nome da música">
@@ -200,7 +200,7 @@
 
                     <div class="card">
                         <h3>Carregar Música</h3>
-                        <form action="index.php" method="post">
+                        <form action="" method="post">
                             <div class="form-group">
                                 <label for="carregar_musica">Selecione uma música:</label>
                                 <select name="carregar_musica" id="carregar_musica" class="select-estilizado">
@@ -285,7 +285,7 @@
                 // Ou simplesmente recarregar a página com o novo valor
                 const form = document.createElement('form');
                 form.method = 'POST';
-                form.action = 'index.php';
+                form.action = '';
                 const input = document.createElement('input');
                 input.type = 'hidden';
                 input.name = 'bpm';

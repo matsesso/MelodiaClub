@@ -450,8 +450,3 @@ class MusicSheetController {
         }
     }
 }
-
-if ($_SERVER["REQUEST_METHOD"] === 'POST') {
-    MusicSheetController::validation($_POST);
-}
-

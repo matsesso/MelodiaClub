@@ -1,1 +1,0 @@
-{"notas":"C1 | C1 | C1 | C1 | C1 | ","tom":"C","compasso":"1\/4","bpm":"120"}

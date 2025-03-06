@@ -1,1 +1,0 @@
-{"notas":"B1B1 | C'1D'1 | D'1C'1 | B1A1 | G1G1 | \\nA1B1 | B1A1 | A1C1C1 | ","tom":"C","compasso":"2\/4","bpm":"150"}

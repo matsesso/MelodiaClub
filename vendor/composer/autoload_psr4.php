@@ -6,5 +6,5 @@ $vendorDir = dirname(__DIR__);
 $baseDir = dirname($vendorDir);
 
 return array(
-    'MelodiaClub\\' => array($baseDir . '/src'),
+    'MelodiaClub\\' => array($baseDir . '/'),
 );

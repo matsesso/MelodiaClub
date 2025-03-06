@@ -16,7 +16,7 @@ class ComposerStaticInitff3db9ab1069afcdf503ef9bc3b378b8
     public static $prefixDirsPsr4 = array (
         'MelodiaClub\\' => 
         array (
-            0 => __DIR__ . '/../..' . '/src',
+            0 => __DIR__ . '/../..' . '/',
         ),
     );
 

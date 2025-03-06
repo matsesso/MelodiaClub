@@ -1,0 +1,17 @@
+# Habilita o mecanismo de reescrita
+RewriteEngine On
+
+# Define a base para as reescritas
+RewriteBase /
+
+# Redireciona requisições para index.php
+RewriteRule ^index$ index.php [L]
+
+# Remove a extensão .php das URLs
+RewriteCond %{REQUEST_FILENAME}.php -f
+RewriteRule ^(.*)$ $1.php [L]
+
+# Redireciona todas as outras requisições para index.php
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ index.php [L]

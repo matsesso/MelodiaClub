@@ -378,19 +378,19 @@ class MusicSheetController {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (isset($data['limpar'])) {
                 $musicSheet->clearSheet();
-                header("Location: " . $_SERVER['PHP_SELF']);
+                header("Location:/index");
                 exit();
             }
         
             if (isset($data['retirar'])) {
                 $musicSheet->removeLastNote();
-                header("Location: " . $_SERVER['PHP_SELF']);
+                header("Location:/index");
                 exit();
             }
         
             if (isset($data['compasso'])) {
                 $musicSheet->updateTimeSignature($data['compasso']);
-                header("Location: " . $_SERVER['PHP_SELF']);
+                header("Location:/index");
                 exit();
             }
         
@@ -399,19 +399,19 @@ class MusicSheetController {
                 $_SESSION[$success ? 'sucesso' : 'erro'] = $success 
                     ? "Acorde adicionado ao compasso {$data['numero_compasso']}!" 
                     : "Número de compasso inválido!";
-                header("Location: " . $_SERVER['PHP_SELF']);
+                header("Location:/index");
                 exit();
             }
         
             if (isset($data['bpm'])) {
                 $musicSheet->updateTempo($data['bpm']);
-                header("Location: " . $_SERVER['PHP_SELF']);
+                header("Location:/index");
                 exit();
             }
         
             if (isset($data['tom'])) {
                 $musicSheet->updateKey($data['tom']);
-                header("Location: " . $_SERVER['PHP_SELF']);
+                header("Location:/index");
                 exit();
             }
         
@@ -420,7 +420,7 @@ class MusicSheetController {
                 if ($success) {
                     $_SESSION['sucesso'] = "Nota adicionada com sucesso!";
                 }
-                header("Location: " . $_SERVER['PHP_SELF']);
+                header("Location:/index");
                 exit();
             }
         
@@ -429,7 +429,7 @@ class MusicSheetController {
                 $_SESSION[$success ? 'sucesso' : 'erro'] = $success 
                     ? "Música '{$data['nome_musica']}' salva com sucesso!" 
                     : "Erro ao salvar a música!";
-                header("Location: " . $_SERVER['PHP_SELF']);
+                header("Location:/index");
                 exit();
             }
         
@@ -438,13 +438,13 @@ class MusicSheetController {
                 $_SESSION[$success ? 'sucesso' : 'erro'] = $success 
                     ? "Música '{$data['carregar_musica']}' carregada com sucesso!" 
                     : "Erro ao carregar a música!";
-                header("Location: " . $_SERVER['PHP_SELF']);
+                header("Location:/index");
                 exit();
             }
 
             if(isset($data['ritornelo'])) {
                 $musicSheet->addRitornello();
-                header("Location: " . $_SERVER['PHP_SELF']);
+                header("Location:/index");
                 exit();
             }
         }

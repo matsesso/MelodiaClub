@@ -236,4 +236,86 @@ class MusicSheetController {
             }
         }
     }
+
+    public static function validation ($data) {
+        $musicSheet = new MusicSheetController();
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            if (isset($data['limpar'])) {
+                $musicSheet->clearSheet();
+                header("Location: " . $_SERVER['PHP_SELF']);
+                exit();
+            }
+        
+            if (isset($data['retirar'])) {
+                $musicSheet->removeLastNote();
+                header("Location: " . $_SERVER['PHP_SELF']);
+                exit();
+            }
+        
+            if (isset($data['compasso'])) {
+                $musicSheet->updateTimeSignature($data['compasso']);
+                header("Location: " . $_SERVER['PHP_SELF']);
+                exit();
+            }
+        
+            if (isset($data['acorde']) && isset($data['numero_compasso'])) {
+                $success = $musicSheet->addChord($data['acorde'], (int)$data['numero_compasso']);
+                $_SESSION[$success ? 'sucesso' : 'erro'] = $success 
+                    ? "Acorde adicionado ao compasso {$data['numero_compasso']}!" 
+                    : "Número de compasso inválido!";
+                header("Location: " . $_SERVER['PHP_SELF']);
+                exit();
+            }
+        
+            if (isset($data['bpm'])) {
+                $musicSheet->updateTempo($data['bpm']);
+                header("Location: " . $_SERVER['PHP_SELF']);
+                exit();
+            }
+        
+            if (isset($data['tom'])) {
+                $musicSheet->updateKey($data['tom']);
+                header("Location: " . $_SERVER['PHP_SELF']);
+                exit();
+            }
+        
+            if (isset($data['nota'])) {
+                $success = $musicSheet->addNote($data['nota'], $data['oitava'], $data['nota_select']);
+                if ($success) {
+                    $_SESSION['sucesso'] = "Nota adicionada com sucesso!";
+                }
+                header("Location:/MelodiaClub/index.php");
+                exit();
+            }
+        
+            if (isset($data['salvar_musica']) && isset($data['nome_musica'])) {
+                $success = $musicSheet->saveMusic($data['nome_musica']);
+                $_SESSION[$success ? 'sucesso' : 'erro'] = $success 
+                    ? "Música '{$data['nome_musica']}' salva com sucesso!" 
+                    : "Erro ao salvar a música!";
+                header("Location: " . $_SERVER['PHP_SELF']);
+                exit();
+            }
+        
+            if (isset($data['carregar_musica'])) {
+                $success = $musicSheet->loadMusic($data['carregar_musica']);
+                $_SESSION[$success ? 'sucesso' : 'erro'] = $success 
+                    ? "Música '{$data['carregar_musica']}' carregada com sucesso!" 
+                    : "Erro ao carregar a música!";
+                header("Location: " . $_SERVER['PHP_SELF']);
+                exit();
+            }
+
+            if(isset($data['ritornelo'])) {
+                $ritornelo = $data['ritornelo'];
+                file_put_contents($musicSheet->notesFile, $ritornelo, FILE_APPEND);
+            }
+        }
+    }
+
 } 
+
+if ($_SERVER["REQUEST_METHOD"] === 'POST') {
+    MusicSheetController::validation($_POST);
+}
+

@@ -1,6 +1,4 @@
 <?php
-// Inicia a sessão
-session_start();
 
 require_once 'app/Controllers/MusicSheetController.php';
 
@@ -27,80 +25,7 @@ if (!isset($_SESSION['quebraDeLinha'])) {
     $_SESSION['quebraDeLinha'] = 0;
 }
 
-// Processa as requisições POST
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (isset($_POST['limpar'])) {
-        $musicSheet->clearSheet();
-        header("Location: " . $_SERVER['PHP_SELF']);
-        exit();
-    }
-
-    if (isset($_POST['retirar'])) {
-        $musicSheet->removeLastNote();
-        header("Location: " . $_SERVER['PHP_SELF']);
-        exit();
-    }
-
-    if (isset($_POST['compasso'])) {
-        $musicSheet->updateTimeSignature($_POST['compasso']);
-        header("Location: " . $_SERVER['PHP_SELF']);
-        exit();
-    }
-
-    if (isset($_POST['acorde']) && isset($_POST['numero_compasso'])) {
-        $success = $musicSheet->addChord($_POST['acorde'], (int)$_POST['numero_compasso']);
-        $_SESSION[$success ? 'sucesso' : 'erro'] = $success 
-            ? "Acorde adicionado ao compasso {$_POST['numero_compasso']}!" 
-            : "Número de compasso inválido!";
-        header("Location: " . $_SERVER['PHP_SELF']);
-        exit();
-    }
-
-    if (isset($_POST['bpm'])) {
-        $musicSheet->updateTempo($_POST['bpm']);
-        header("Location: " . $_SERVER['PHP_SELF']);
-        exit();
-    }
-
-    if (isset($_POST['tom'])) {
-        $musicSheet->updateKey($_POST['tom']);
-        header("Location: " . $_SERVER['PHP_SELF']);
-        exit();
-    }
-
-    if (isset($_POST['nota'])) {
-        $success = $musicSheet->addNote($_POST['nota'], $_POST['oitava'], $_POST['nota_select']);
-        if ($success) {
-            $_SESSION['sucesso'] = "Nota adicionada com sucesso!";
-        }
-        header("Location: " . $_SERVER['PHP_SELF']);
-        exit();
-    }
-
-    if (isset($_POST['salvar_musica']) && isset($_POST['nome_musica'])) {
-        $success = $musicSheet->saveMusic($_POST['nome_musica']);
-        $_SESSION[$success ? 'sucesso' : 'erro'] = $success 
-            ? "Música '{$_POST['nome_musica']}' salva com sucesso!" 
-            : "Erro ao salvar a música!";
-        header("Location: " . $_SERVER['PHP_SELF']);
-        exit();
-    }
-
-    if (isset($_POST['carregar_musica'])) {
-        $success = $musicSheet->loadMusic($_POST['carregar_musica']);
-        $_SESSION[$success ? 'sucesso' : 'erro'] = $success 
-            ? "Música '{$_POST['carregar_musica']}' carregada com sucesso!" 
-            : "Erro ao carregar a música!";
-        header("Location: " . $_SERVER['PHP_SELF']);
-        exit();
-    }
-}
-
 //Adicionar Ritornelo
-if(isset($_POST['ritornelo'])) {
-    $ritornelo = $_POST['ritornelo'];
-    file_put_contents("Txts/notas.txt", $ritornelo, FILE_APPEND);
-}
 ?>
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -121,7 +46,7 @@ if(isset($_POST['ritornelo'])) {
         <div id="paper"></div>
         
         <!-- Input de texto -->
-         <form action="" method="post">
+         <form action="app/Controllers/MusicSheetController.php" method="post">
             <label for="nota">Coloque uma nota:</label>
             <select name="nota" id="nota">
                 <option value="C">C</option>

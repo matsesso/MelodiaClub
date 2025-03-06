@@ -91,7 +91,7 @@
                                         <h5 class="mb-0">Adicionar Notas</h5>
                                     </div>
                                     <div class="card-body">
-                                        <form action="/" method="post">
+                                        <form action="" method="post">
                                             <div class="row">
                                                 <div class="col-md-3 mb-3">
                                                     <label for="nota" class="form-label">Nota:</label>
@@ -149,17 +149,17 @@
                                 </div>
 
                                 <div class="d-flex flex-wrap gap-2 mb-4">
-                                    <form action="/" method="post" class="d-inline">
+                                    <form action="" method="post" class="d-inline">
                                         <input type="hidden" name="ritornelo" value=":">
                                         <button type="submit" class="btn btn-outline-secondary">Adicionar Ritornelo</button>
                                     </form>
                                     
-                                    <form action="/" method="post" class="d-inline">
+                                    <form action="" method="post" class="d-inline">
                                         <input type="hidden" name="retirar" value="1">
                                         <button type="submit" class="btn btn-outline-secondary">Retirar Última Nota</button>
                                     </form>
                                     
-                                    <form action="/" method="post" class="d-inline">
+                                    <form action="" method="post" class="d-inline">
                                         <input type="hidden" name="limpar" value="1">
                                         <button type="submit" class="btn btn-outline-danger">Limpar Todas as Notas</button>
                                     </form>
@@ -170,7 +170,7 @@
                                         <h5 class="mb-0">Adicionar Acorde</h5>
                                     </div>
                                     <div class="card-body">
-                                        <form action="/" method="post">
+                                        <form action="" method="post">
                                             <div class="row">
                                                 <div class="col-md-5 mb-3">
                                                     <label for="acorde" class="form-label">Acorde:</label>
@@ -198,7 +198,7 @@
                                                 <h5 class="mb-0">Tonalidade</h5>
                                             </div>
                                             <div class="card-body">
-                                                <form action="/" method="post">
+                                                <form action="" method="post">
                                                     <div class="mb-3">
                                                         <label for="tom" class="form-label">Selecione a tonalidade:</label>
                                                         <select name="tom" id="tom" class="form-select">
@@ -223,7 +223,7 @@
                                                 <h5 class="mb-0">Fórmula de Compasso</h5>
                                             </div>
                                             <div class="card-body">
-                                                <form action="/" method="post">
+                                                <form action="" method="post">
                                                     <div class="mb-3">
                                                         <label for="compasso" class="form-label">Selecione o compasso:</label>
                                                         <select name="compasso" id="compasso" class="form-select">
@@ -253,7 +253,7 @@
                                                 <h5 class="mb-0">Salvar Música</h5>
                                             </div>
                                             <div class="card-body">
-                                                <form action="/" method="post">
+                                                <form action="" method="post">
                                                     <div class="mb-3">
                                                         <label for="nome_musica" class="form-label">Nome da música:</label>
                                                         <input type="text" name="nome_musica" id="nome_musica" class="form-control" required placeholder="Digite o nome da música">
@@ -270,7 +270,7 @@
                                                 <h5 class="mb-0">Carregar Música</h5>
                                             </div>
                                             <div class="card-body">
-                                                <form action="/" method="post">
+                                                <form action="" method="post">
                                                     <div class="mb-3">
                                                         <label for="carregar_musica" class="form-label">Selecione uma música:</label>
                                                         <select name="carregar_musica" id="carregar_musica" class="form-select">

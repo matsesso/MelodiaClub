@@ -47,16 +47,37 @@ class MusicSheetController {
         if (count($_SESSION['notas']) > 0) {
             $last_note = array_pop($_SESSION['notas']);
             
-            // Verifica se a nota removida tinha ligadura
+            // Verifica se a nota removida era o início ou final de uma ligadura
             if (strpos($last_note, '-') !== false) {
-                // Se tinha ligadura, verifica se há outras ligaduras para remover
-                $linked_notes = array_keys($_SESSION['notas_ligadas'], true);
-                if (!empty($linked_notes)) {
-                    $last_linked = end($linked_notes);
-                    if ($last_linked) {
-                        unset($_SESSION['notas_ligadas'][$last_linked]);
+                // Se tinha ligadura, vamos remover todas as notas relacionadas
+                $tempNotas = $_SESSION['notas'];
+                $notasLigadas = [];
+                $removerIndices = [];
+                
+                // Encontra todas as notas que fazem parte da mesma ligadura (para frente e para trás)
+                for ($i = count($tempNotas) - 1; $i >= 0; $i--) {
+                    if (strpos($tempNotas[$i], '-') !== false) {
+                        $removerIndices[] = $i;
+                        // Se encontrarmos uma nota sem ligadura, interrompemos a busca
+                    } else if (!empty($removerIndices)) {
+                        // Se já encontramos pelo menos uma nota ligada e encontramos uma sem ligadura,
+                        // isso significa que terminamos a ligadura atual
+                        break;
                     }
                 }
+                
+                // Remove as notas ligadas começando do índice mais alto para o mais baixo
+                rsort($removerIndices);
+                foreach ($removerIndices as $idx) {
+                    array_splice($_SESSION['notas'], $idx, 1);
+                    // Também remove do array de notas ligadas
+                    if (isset($_SESSION['notas_ligadas'][$idx])) {
+                        unset($_SESSION['notas_ligadas'][$idx]);
+                    }
+                }
+                
+                // Reindexar o array notas_ligadas após a remoção
+                $_SESSION['notas_ligadas'] = array_values(array_filter($_SESSION['notas_ligadas']));
             }
             
             // Se removeu uma nota que completa um compasso (a barra |), atualiza a contagem
@@ -306,6 +327,7 @@ class MusicSheetController {
                 $formattedDuration = $this->formatDuration($remainingTime);
                 $notaIndex = count($_SESSION['notas']);
                 $_SESSION['notas'][] = "-" . $noteValue['note'] . $formattedDuration;
+                $_SESSION['notas_ligadas'][$notaIndex] = true;
                 $_SESSION['quantidadeDeCompassos'] = $remainingTime;
             } else {
                 $_SESSION['quantidadeDeCompassos'] = 0;
@@ -315,6 +337,13 @@ class MusicSheetController {
             // Nota cabe no compasso atual
             if(isset($noteValue['duration']) && $noteValue['duration'] != ".") {
                 $formattedDuration = $noteValue['duration'];
+                
+                // Verificar se a duração é menor que 1 e não está em formato de fração
+                if ($noteValue['value'] < 1 && is_numeric($formattedDuration) && $formattedDuration > 0) {
+                    // Converter para formato de fração adequado para o abcjs
+                    $formattedDuration = $this->formatDuration($noteValue['value']);
+                }
+                
                 $_SESSION['notas'][] = $noteValue['note'] . $formattedDuration;
                 $_SESSION['quantidadeDeCompassos'] += $noteValue['value'];
                 

@@ -1,0 +1,15 @@
+{
+    "name": "matheussesso/melodia-club",
+    "autoload": {
+        "psr-4": {
+            "MelodiaClub\\": ""
+        }
+    },
+    "authors": [
+        {
+            "name": "Guilherme Barros",
+            "email": "guilhermebarros@gmail.com"
+        }
+    ],
+    "require": {}
+}

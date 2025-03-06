@@ -104,7 +104,7 @@
                                 </select>
                             </div>
                             <div class="form-group">
-                                <button type="submit" class="btn-primario">Adicionar Nota</button>
+                                <button type="submit" class="btn-primario" style="margin-top: 2.1rem;">Adicionar Nota</button>
                             </div>
                         </form>
                     </div>
@@ -138,7 +138,7 @@
                                 <input type="number" name="numero_compasso" id="numero_compasso" min="1" required>
                             </div>
                             <div class="form-group">
-                                <button type="submit" class="btn-primario">Adicionar Acorde</button>
+                                <button type="submit" class="btn-primario" style="margin-top: 2.1rem;">Adicionar Acorde</button>
                             </div>
                         </form>
                     </div>

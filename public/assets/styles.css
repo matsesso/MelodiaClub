@@ -273,7 +273,6 @@ button {
 .btn-primario {
     background-color: var(--cor-primaria);
     color: white;
-    margin-top: 34px;
 }
 
 .btn-primario:hover {
